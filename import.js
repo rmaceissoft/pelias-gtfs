@@ -4,7 +4,8 @@ var request = require('request')
   , parseArgs = require('minimist')
   , JSONStream = require('JSONStream')
   , es = require('event-stream')
-  , logger = require('pelias-logger').get('gtfs');
+  , logger = require('pelias-logger').get('gtfs')
+  , peliasConfig = require('pelias-config').generate();
 
 var importPipelines = require('./lib/import_pipelines');
 
@@ -36,8 +37,14 @@ function importStops (url) {
 
 if (require.main === module) {
   var argv = parseArgs(process.argv.slice(2));
+  var url;
   if (argv._.length > 0) {
-    importStops(argv._[0]);
+    url = argv._[0];
+  } else {
+    url = peliasConfig.imports.gtfs.stopsurl;
+  }
+  if (url !== undefined) {
+    importStops(url);
   } else {
     console.error("url wasn't provided");
     process.exit(2);
