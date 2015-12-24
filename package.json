@@ -1,0 +1,32 @@
+{
+  "name": "pelias-gtfs",
+  "version": "1.0.0",
+  "description": "Pelias import pipeline for GTFS Stops via Open Trip Planner REST API",
+  "main": "import.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Reiner Marquez",
+  "license": "MIT",
+  "homepage": "https://github.com/rmaceissoft/pelias-gtfs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rmaceissoft/pelias-gtfs.git"
+  },
+  "keywords": [
+    "Pelias",
+    "GTFS",
+    "import"
+  ],
+  "dependencies": {
+    "JSONStream": "^1.0.7",
+    "event-stream": "^3.3.2",
+    "minimist": "^1.2.0",
+    "pelias-config": "^1.0.3",
+    "pelias-dbclient": "0.0.9",
+    "pelias-logger": "0.0.8",
+    "pelias-model": "^0.4.0",
+    "request": "^2.67.0",
+    "through2": "^2.0.0"
+  }
+}
