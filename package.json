@@ -22,6 +22,7 @@
     "JSONStream": "^1.0.7",
     "event-stream": "^3.3.2",
     "minimist": "^1.2.0",
+    "pelias-admin-lookup": "^2.0.8",
     "pelias-config": "^1.0.3",
     "pelias-dbclient": "0.0.9",
     "pelias-logger": "0.0.8",

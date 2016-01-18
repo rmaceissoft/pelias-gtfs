@@ -5,7 +5,8 @@ var request = require('request')
   , JSONStream = require('JSONStream')
   , es = require('event-stream')
   , logger = require('pelias-logger').get('gtfs')
-  , peliasConfig = require('pelias-config').generate();
+  , peliasConfig = require('pelias-config').generate()
+  , peliasAdminLookup = require('pelias-admin-lookup');
 
 var importPipelines = require('./lib/import_pipelines');
 
@@ -15,12 +16,19 @@ function importStops (url) {
   var startTime;
 
   logger.info('Importing stops from url %s', url);
-  request({url: url})
+  var pipeline = request({url: url})
     .pipe(JSONStream.parse('*'))
     .on('data', function (data) {
       logger.info(data);
     })
-    .pipe(importPipelines.createRecordStream())
+    .pipe(importPipelines.createRecordStream());
+
+  if(peliasConfig.imports.gtfs.adminLookup ) {
+    pipeline = pipeline
+      .pipe(peliasAdminLookup.stream())
+  }
+
+  pipeline
     .pipe(importPipelines.createPeliasElasticsearchPipeline())
     .once('data', function () {
       startTime = new Date().getTime();
@@ -43,6 +51,7 @@ if (require.main === module) {
   } else {
     url = peliasConfig.imports.gtfs.stopsurl;
   }
+
   if (url !== undefined) {
     importStops(url);
   } else {
