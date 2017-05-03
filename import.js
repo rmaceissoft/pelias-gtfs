@@ -6,40 +6,37 @@ var request = require('request')
   , es = require('event-stream')
   , logger = require('pelias-logger').get('gtfs')
   , peliasConfig = require('pelias-config').generate()
-  , peliasAdminLookup = require('pelias-admin-lookup');
+  , peliasDbclient = require('pelias-dbclient')
+  , peliasModel = require('pelias-model')
+  , adminLookupStream = require('pelias-wof-admin-lookup');
 
 var importPipelines = require('./lib/import_pipelines');
 
-
-function importStops (url) {
-
-  var startTime;
-
-  logger.info('Importing stops from url %s', url);
-  var pipeline = request({url: url})
-    .pipe(JSONStream.parse('*'))
-    .on('data', function (data) {
-      logger.info(data);
-    })
-    .pipe(importPipelines.createRecordStream());
-
-  if(peliasConfig.imports.gtfs.adminLookup ) {
-    pipeline = pipeline
-      .pipe(peliasAdminLookup.stream())
-  }
-
-  pipeline
-    .pipe(importPipelines.createPeliasElasticsearchPipeline())
-    .once('data', function () {
-      startTime = new Date().getTime();
-    })
-
+// Pretty-print the total time the import took.
+function startTiming() {
+  var startTime = new Date().getTime();
   process.on('exit', function () {
     var totalTimeTaken = (new Date().getTime() - startTime).toString();
     var seconds = totalTimeTaken.slice(0, totalTimeTaken.length - 3);
     var milliseconds = totalTimeTaken.slice(totalTimeTaken.length - 3);
     logger.info( 'Total time taken: %s.%ss', seconds, milliseconds );
   });
+}
+
+function importStops (url) {
+  logger.info('Importing stops from url %s', url);
+
+  var endStream = peliasDbclient();
+
+  request({url: url})
+    .pipe(JSONStream.parse('*'))
+    .on('data', function (data) {
+      logger.info(data);
+    })
+    .pipe(importPipelines.createRecordStream())
+    .pipe(adminLookupStream.create())
+    .pipe(peliasModel.createDocumentMapperStream())
+    .pipe(endStream);
 }
 
 
@@ -53,6 +50,7 @@ if (require.main === module) {
   }
 
   if (url !== undefined) {
+    startTiming();
     importStops(url);
   } else {
     console.error("url wasn't provided");
