@@ -4,6 +4,7 @@
   "description": "Pelias import pipeline for GTFS Stops via Open Trip Planner REST API",
   "main": "import.js",
   "scripts": {
+    "start": "node --max_old_space_size=4096 import.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Reiner Marquez",
